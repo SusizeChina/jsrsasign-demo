@@ -8,45 +8,74 @@
 
 <body>
 
-
-<button id="sign">签名</button>
+<button onclick="getPrivateKey()">获取私钥</button>
 <br/>
-<button id="verify">验签</button>
+<button onclick="sign()">签名</button>
+<br/>
+<button onclick="getPublicKey()">获取公钥</button>
+<br/>
+<button onclick="verify()">验签</button>
 <br/>
 </body>
-
-
-<script type="module">
-  import {sortSignFiled, rsaSign, rsaVerifySign} from "./js/jsrsasign/rsa.js"
-
+<!--或使用npm方式依赖 npm install jsrsasign jsrsasign-util-->
+<script src="js/jsrsasign/jsrsasign-all-min.js"></script>
+<!--或使用npm方式依赖 npm install --save js-base64-->
+<script src="js/base64/base64.js"></script>
+<script type="application/javascript">
+  // 私钥
+  let privateKey;
+  // 公钥
+  let publicKey;
+  //const ALGORITHM = 'MD5withRSA';
+  const ALGORITHM = 'SHA1withRSA';
   const obj = {
     "name": "李四",
     "sex": "男",
     "age": "24",
     "class": "一班"
   };
-
+  let src = sortSignFiled(obj);
   let signStr;
 
-  window.addEventListener('click', e => {
-    switch (e.target.id) {
-      case 'sign':
-        sign();
-        break;
-      case 'verify':
-        verify();
-        break;
+  function getPrivateKey() {
+    // base64之后的私钥
+    privateKey = "LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JSUNlQUlCQURBTkJna3Foa2lHOXcwQkFRRUZBQVNDQW1Jd2dnSmVBZ0VBQW9HQkFQZGRKM1BVeWZOck1FUTMKa281OVBIUWpKVWxubkJ2bnVLeXNLNGNPR2RoZkMyWjJGQnFXQWdqUitqTjU0V2t5a0MrV2VZY0xXU2xidGRVYQo5bWN2SGR0WnNJUnQvNmt4SmJpU1pDNGo3bHpGRlFsc0tYdXgxbzRNR3NnMkFSRWM4Z0pVTFh3QWt0T0VSVXdmCktPNUhvbWZqTkNiSmcxdEY1S1MxajhHc1ZPOHhBZ01CQUFFQ2dZRUE2ZUcxSk1yajYzakVtU3RtTWIxdHhHMWEKbXU0UTV6MlFHZ3RyMkhWWHNJSWxHRXE2dFd4eUhmN1RMNHFrdXo5b251WUtuOG4yRXFtNDRmWnRWYUJ4KzVFUwp6UnBJdmxUdmF4bVZ1MEhaMWhZQXpVdzFYeVJuWE5NS3BMNXRUNEdDam04K1FHUHpsR3hnWEkxc05nOHI5SmF3Cjl6UlVZZUE2TFFSOVJJTWtIV1VDUVFEOFFvampWb0dqdGl1bm9oL044aXBsaFVzelpJYXZBRXZtRElFK2tWeSsKcEE3aHZsdWtMdzZKTWM3Y2ZUY25IeXhEbzlpSFZJenJXbFR1S1JxOUtXVkxBa0VBK3dnSlMyc2d0bGRuQ1ZuNgp0SktGVndzSHJXaE1JVTI5bXNQUGJOdVdVRDIzQmNLRS92ZWhJeUZ1MWFoTkEvVGlNNDBQRW56cHJRNUpmUHhVCjE2Uzc4d0pBTlRmTUxUbll5N0xvN3NxVEx4MkJ1RDB3cWp6dzlRWjQvS1Z5dHNKdjhJQW42NVAvUFZuNEZSVisKOEtFeCszem1GN2IvUFQybkpSZS9oeWNBenh0bWxRSkJBTXJGd1F4RXFwWGZvQUV6eDRsWTJaQm4vbm1hUi9TVwo0Vk5FWENib2NWQzdxVDFqMVI1SFZNZ1YxM3VLaVR0cThkVUdXbWhxc2k3eDNYYXlOSzVFQ1BVQ1FRRFphQU42CnR2SUhBcHo5T0xzWFN3MGpaaXJRNktFWWRoYXJYYklWRHkxVzFzVkUzbHpMYnFMZEZwMWJ4QUhRSXZzWVM1UE0KQTl2ZVNKaDM3MlJMSktragotLS0tLUVORCBQUklWQVRFIEtFWS0tLS0t";
+    privateKey = Base64.decode(privateKey)
+  }
+
+  function getPublicKey() {
+    // base64之后的公钥
+    publicKey = "LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUlHZk1BMEdDU3FHU0liM0RRRUJBUVVBQTRHTkFEQ0JpUUtCZ1FEM1hTZHoxTW56YXpCRU41S09mVHgwSXlWSgpaNXdiNTdpc3JDdUhEaG5ZWHd0bWRoUWFsZ0lJMGZvemVlRnBNcEF2bG5tSEMxa3BXN1hWR3Zabkx4M2JXYkNFCmJmK3BNU1c0a21RdUkrNWN4UlVKYkNsN3NkYU9EQnJJTmdFUkhQSUNWQzE4QUpMVGhFVk1IeWp1UjZKbjR6UW0KeVlOYlJlU2t0WS9CckZUdk1RSURBUUFCCi0tLS0tRU5EIFBVQkxJQyBLRVktLS0tLQ==";
+    publicKey = Base64.decode(publicKey)
+  }
+
+  //排序的函数
+  function sortSignFiled(obj) {
+    //先用Object内置类的keys方法获取要排序对象的属性名数组，再利用Array的sort方法进行排序
+    var newkey = Object.keys(obj).sort();
+    console.log('newkey=' + newkey);
+    var newObj = ''; //创建一个新的对象，用于存放排好序的键值对
+    for (var i = 0; i < newkey.length; i++) {
+      //遍历newkey数组
+      newObj += [newkey[i]] + '=' + obj[newkey[i]] + '&';
     }
-  })
+    //追加时间搓
+    newObj += "timestamp=" + Date.now();
+    return newObj.substring(0, newObj.length - 1);
+  }
 
   /**
    * 前端签名
    * @returns {KJUR.crypto.Signature.hSign|*}
    */
   function sign() {
-    signStr = rsaSign(sortSignFiled(obj))
+    const signature = new KJUR.crypto.Signature({'alg': ALGORITHM});
+    const priKey = KEYUTIL.getKey(privateKey);
+    signature.init(priKey); // 初始化实例
+    signature.updateString(src); // 传入待签明文
+    signStr = hextob64(signature.sign());
     alert(signStr)
-    return signStr;
+    return signStr
   }
 
   /**
@@ -54,9 +83,13 @@
    * @returns {*}
    */
   function verify() {
-    const result = rsaVerifySign(sortSignFiled(obj), signStr)
+    const signature = new KJUR.crypto.Signature({'alg': ALGORITHM});
+    const pubKey = KEYUTIL.getKey(publicKey);
+    signature.init(pubKey); // 初始化实例
+    signature.updateString(src); // 传入签名字符串
+    const result = signature.verify(b64tohex(signStr));    //传入签名后的明文
     alert(result)
-    return result;
+    return result
   }
 </script>
 </html>
