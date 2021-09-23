@@ -1,0 +1,62 @@
+<!doctype html>
+<html class="no-js" lang="">
+
+<head>
+  <meta charset="utf-8">
+  <title></title>
+</head>
+
+<body>
+
+
+<button id="sign">签名</button>
+<br/>
+<button id="verify">验签</button>
+<br/>
+</body>
+
+
+<script type="module">
+  import {sortSignFiled, rsaSign, rsaVerifySign} from "./js/jsrsasign/rsa.js"
+
+  const obj = {
+    "name": "李四",
+    "sex": "男",
+    "age": "24",
+    "class": "一班"
+  };
+
+  let signStr;
+
+  window.addEventListener('click', e => {
+    switch (e.target.id) {
+      case 'sign':
+        sign();
+        break;
+      case 'verify':
+        verify();
+        break;
+    }
+  })
+
+  /**
+   * 前端签名
+   * @returns {KJUR.crypto.Signature.hSign|*}
+   */
+  function sign() {
+    signStr = rsaSign(sortSignFiled(obj))
+    alert(signStr)
+    return signStr;
+  }
+
+  /**
+   * 后台验签 示例
+   * @returns {*}
+   */
+  function verify() {
+    const result = rsaVerifySign(sortSignFiled(obj), signStr)
+    alert(result)
+    return result;
+  }
+</script>
+</html>
